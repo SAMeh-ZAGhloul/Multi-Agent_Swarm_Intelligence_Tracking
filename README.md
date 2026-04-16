@@ -279,7 +279,6 @@ flowchart BT
     SvcCoordinator --> SvcGateway
     SvcGateway --> UI
 
-    note over UI: UI never imports services directly<br>Only communicates via WebSocket/REST
 ```
 
 ---
