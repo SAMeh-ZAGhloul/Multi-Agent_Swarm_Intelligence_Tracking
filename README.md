@@ -6,7 +6,111 @@ AEGIS-AI is a distributed multi-agent system for real-time detection, tracking, 
 
 ---
 
-## 📁 Repository Structure
+## Core Algorithms
+
+| Component | Algorithm | Purpose | Performance |
+|-----------|-----------|---------|-------------|
+| Data Association | Hungarian Algorithm (LAPJV) | Assign observations to tracks | O(N²), 10Hz for N=200 |
+| State Estimation | Extended Kalman Filter (CTRA Model) | Drone position/velocity tracking | 7-dimensional state vector |
+| Swarm Grouping | Modified DBSCAN | Cluster drones into swarms | Spatial + Velocity distance metric |
+| Graph Construction | Dynamic Interaction Graph | Represent swarm topology | Nodes: drones, Edges: interaction links |
+| Behavior Classification | Graph Attention Network (GAT) | Classify swarm behavior | 3 layers, 4 heads, 6 behavior classes |
+| Parameter Inversion | Maximum Likelihood Estimation | Extract Reynolds flocking weights | Solve linear system for [w_sep, w_align, w_coh] |
+| Threat Scoring | Weighted Composite Score | Rank swarm threat level | 0.0 → 1.0 normalized score |
+| Response Allocation | Proximal Policy Optimization (PPO) | Optimal countermeasure assignment | Trained in simulation |
+
+---
+
+## Example Scenarios
+
+| Scenario | Description | Drones |
+|----------|-------------|--------|
+| `saturation_attack` | Massed frontal assault with high speed | 50-200 |
+| `decoy_strike` | Decoy swarm diverting attention from main attack | 40 |
+| `dispersed_formation` | Wide spread low coherence swarm | 30 |
+| `loitering_munitions` | Stationary loitering pattern | 25 |
+| `split_merge` | Dynamic splitting and merging maneuvers | 60 |
+
+---
+
+## High Level Architecture Layers
+
+```mermaid
+flowchart TD
+    classDef layer fill:#165DFF,stroke:#0D47A1,color:white,stroke-width:2px
+    classDef service fill:#36B37E,stroke:#22863A,color:white
+    classDef agent fill:#FFAB00,stroke:#B37A00,color:black
+    classDef ui fill:#E34C26,stroke:#A12F18,color:white
+
+    S[Sensors / Simulator] -->|Raw Observations| I
+
+    subgraph LAYER 1: INGESTION
+    I[Ingest Service]:::service
+    I -->|Fused Observations 10Hz| T
+    end
+
+    subgraph TIER 1: TRACKING
+    T[Tracker Agent Pool]:::agent
+    T -->|Track States| SWA
+    end
+
+    subgraph TIER 2: SWARM INTELLIGENCE
+    SWA[Swarm Agent Pool]:::agent
+    SWA -->|Swarm Intel Reports| C
+    end
+
+    subgraph TIER 3: COORDINATION
+    C[Response Coordinator]:::agent
+    C -->|Threat Assessment| G
+    end
+
+    subgraph GATEWAY
+    G[API Gateway]:::service
+    G -->|WebSocket Stream| UI
+    end
+
+    subgraph USER INTERFACE
+    UI[Dashboard]:::ui
+    end
+```
+
+---
+
+## System Characteristics
+
+| Property | Value |
+|----------|-------|
+| Maximum tracked drones | > 1000 |
+| Maximum concurrent swarms | 20 |
+| Tracking latency | < 100ms |
+| End-to-end latency | < 500ms |
+| Update rate (tracks) | 10 Hz |
+| Update rate (swarm intel) | 2 Hz |
+| Update rate (threat assessment) | 1 Hz |
+| UI refresh rate | 2 Hz |
+| Availability target | 99.99% |
+
+---
+
+## Architecture Principles
+
+✅ **No Single Point of Failure** - Every critical function runs as a pool of distributed agents 
+
+✅ **Horizontally Scalable** - Agent pools automatically scale with threat size 
+
+✅ **Zero Centralized Bottlenecks** - No single process handling all data 
+
+✅ **Computation Follows Threat** - Agents are spawned and terminated dynamically 
+
+✅ **Resilient To Degradation** - System continues operating during partial failure 
+
+✅ **Math-Driven Design** - Code structure maps 1:1 to mathematical architecture 
+
+
+---
+
+
+## Repository Structure
 
 ```
 ├── core/                     # Core domain logic & algorithms
@@ -57,50 +161,7 @@ AEGIS-AI is a distributed multi-agent system for real-time detection, tracking, 
 
 ---
 
-## 🏗️ System Architecture
-
-### High Level Architecture Layers
-
-```mermaid
-flowchart TD
-    classDef layer fill:#165DFF,stroke:#0D47A1,color:white,stroke-width:2px
-    classDef service fill:#36B37E,stroke:#22863A,color:white
-    classDef agent fill:#FFAB00,stroke:#B37A00,color:black
-    classDef ui fill:#E34C26,stroke:#A12F18,color:white
-
-    S[Sensors / Simulator] -->|Raw Observations| I
-
-    subgraph LAYER 1: INGESTION
-    I[Ingest Service]:::service
-    I -->|Fused Observations 10Hz| T
-    end
-
-    subgraph TIER 1: TRACKING
-    T[Tracker Agent Pool]:::agent
-    T -->|Track States| SWA
-    end
-
-    subgraph TIER 2: SWARM INTELLIGENCE
-    SWA[Swarm Agent Pool]:::agent
-    SWA -->|Swarm Intel Reports| C
-    end
-
-    subgraph TIER 3: COORDINATION
-    C[Response Coordinator]:::agent
-    C -->|Threat Assessment| G
-    end
-
-    subgraph GATEWAY
-    G[API Gateway]:::service
-    G -->|WebSocket Stream| UI
-    end
-
-    subgraph USER INTERFACE
-    UI[Streamlit Dashboard]:::ui
-    end
-```
-
----
+## System Architecture
 
 ### Complete Data Flow Pipeline
 
@@ -217,22 +278,7 @@ flowchart BT
 
 ---
 
-## 🧠 Core Algorithms
-
-| Component | Algorithm | Purpose | Performance |
-|-----------|-----------|---------|-------------|
-| Data Association | Hungarian Algorithm (LAPJV) | Assign observations to tracks | O(N²), 10Hz for N=200 |
-| State Estimation | Extended Kalman Filter (CTRA Model) | Drone position/velocity tracking | 7-dimensional state vector |
-| Swarm Grouping | Modified DBSCAN | Cluster drones into swarms | Spatial + Velocity distance metric |
-| Graph Construction | Dynamic Interaction Graph | Represent swarm topology | Nodes: drones, Edges: interaction links |
-| Behavior Classification | Graph Attention Network (GAT) | Classify swarm behavior | 3 layers, 4 heads, 6 behavior classes |
-| Parameter Inversion | Maximum Likelihood Estimation | Extract Reynolds flocking weights | Solve linear system for [w_sep, w_align, w_coh] |
-| Threat Scoring | Weighted Composite Score | Rank swarm threat level | 0.0 → 1.0 normalized score |
-| Response Allocation | Proximal Policy Optimization (PPO) | Optimal countermeasure assignment | Trained in simulation |
-
----
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.11+
@@ -271,34 +317,7 @@ pytest tests/scenarios/ -v
 
 ---
 
-## 📊 System Characteristics
-
-| Property | Value |
-|----------|-------|
-| Maximum tracked drones | > 1000 |
-| Maximum concurrent swarms | 20 |
-| Tracking latency | < 100ms |
-| End-to-end latency | < 500ms |
-| Update rate (tracks) | 10 Hz |
-| Update rate (swarm intel) | 2 Hz |
-| Update rate (threat assessment) | 1 Hz |
-| UI refresh rate | 2 Hz |
-| Availability target | 99.99% |
-
----
-
-## 🔧 Architecture Principles
-
-✅ **No Single Point of Failure** - Every critical function runs as a pool of distributed agents
-✅ **Horizontally Scalable** - Agent pools automatically scale with threat size
-✅ **Zero Centralized Bottlenecks** - No single process handling all data
-✅ **Computation Follows Threat** - Agents are spawned and terminated dynamically
-✅ **Resilient To Degradation** - System continues operating during partial failure
-✅ **Math-Driven Design** - Code structure maps 1:1 to mathematical architecture
-
----
-
-## 📚 Additional Documentation
+## Additional Documentation
 
 Complete system documentation is available in the `System_Design/` directory:
 - [ARCHITECTURE.md](System_Design/ARCHITECTURE.md) - Full technical architecture
@@ -310,22 +329,3 @@ Complete system documentation is available in the `System_Design/` directory:
 
 ---
 
-## 🧪 Example Scenarios
-
-| Scenario | Description | Drones |
-|----------|-------------|--------|
-| `saturation_attack` | Massed frontal assault with high speed | 50-200 |
-| `decoy_strike` | Decoy swarm diverting attention from main attack | 40 |
-| `dispersed_formation` | Wide spread low coherence swarm | 30 |
-| `loitering_munitions` | Stationary loitering pattern | 25 |
-| `split_merge` | Dynamic splitting and merging maneuvers | 60 |
-
----
-
-## 📄 License
-
-Proprietary - AEGIS AI System
-
----
-
-*This README was automatically generated from repository analysis and system design documents.*
