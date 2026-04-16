@@ -247,7 +247,7 @@ flowchart BT
     classDef ui fill:#E34C26,color:white
 
     Constants[core/constants]:::core
-    Models[core/models]:::core
+    Agents[core/agents]:::core
     Tracking[core/tracking]:::core
     Swarm[core/swarm]:::core
     Simulation[core/simulation]:::core
@@ -256,16 +256,22 @@ flowchart BT
     SvcSwarm[services/swarm_intel]:::services
     SvcCoordinator[services/coordinator]:::services
     SvcGateway[services/gateway]:::services
+    SvcIngest[services/ingest]:::services
 
     UI[ui/]:::ui
 
-    Constants --> Models
-    Models --> Tracking
-    Models --> Swarm
-    Models --> Simulation
+    Constants --> Agents
+    Constants --> Tracking
+    Constants --> Swarm
+    Constants --> Simulation
+
+    Agents --> Tracking
+    Agents --> Swarm
+    Agents --> Simulation
 
     Tracking --> SvcTracker
     Swarm --> SvcSwarm
+    Simulation --> SvcIngest
 
     SvcTracker --> SvcCoordinator
     SvcSwarm --> SvcCoordinator
@@ -273,7 +279,8 @@ flowchart BT
     SvcCoordinator --> SvcGateway
     SvcGateway --> UI
 
-    note for UI "UI never imports services directly<br/>Only communicates via WebSocket/REST"
+    note over UI: UI never imports services directly
+    note over UI: Only communicates via WebSocket/REST
 ```
 
 ---
